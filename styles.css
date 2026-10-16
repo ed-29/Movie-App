@@ -4,14 +4,15 @@
 ========================= */
 
 :root {
-    --bg-primary: #5c5c86;
-    --bg-secondary: #0000009f;
-    --bg-card: #23232e;
-    --accent: #d000ff;
-    --accent-hover: #d000ffcc;
-    --text-primary: #ffffff;
-    --text-secondary: #a5a5b5;
-    --border-color: #2a2a36;
+    --bg-primary: #f5f6f8;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --accent: #e50914;
+    --accent-hover: #bd0610;
+    --text-primary: #202127;
+    --text-secondary: #70727e;
+    --border-color: #e3e4e9;
+    --shadow: 0 4px 16px rgba(25, 25, 35, 0.06);
 }
 
 * {
@@ -49,7 +50,7 @@ button {
 #hero-container {
     position: relative;
     min-height: 440px;
-    padding: 100px 20px 70px;
+    padding: 90px 20px 70px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -59,8 +60,6 @@ button {
     overflow: hidden;
     isolation: isolate;
 }
-
-/* Background image */
 
 #hero-image {
     position: absolute;
@@ -75,7 +74,7 @@ button {
     object-position: center 35%;
 }
 
-/* Dark overlay for readable text */
+/* Light overlay */
 
 #hero-container::before {
     content: "";
@@ -83,8 +82,8 @@ button {
     inset: 0;
     background: linear-gradient(
         to bottom,
-        rgba(11, 11, 15, 0.55),
-        rgba(11, 11, 15, 0.85) 65%,
+        rgba(255, 255, 255, 0.55),
+        rgba(255, 255, 255, 0.88) 65%,
         var(--bg-primary)
     );
     z-index: -1;
@@ -95,26 +94,28 @@ button {
     font-weight: 800;
     letter-spacing: -1px;
     line-height: 1.2;
+    color: #202127;
 }
 
 #searchInput {
     width: min(100%, 480px);
     padding: 15px 18px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid #d6d7de;
     border-radius: 8px;
     outline: none;
-    background: rgba(20, 20, 28, 0.9);
+    background-color: rgba(255, 255, 255, 0.95);
     color: var(--text-primary);
+    box-shadow: var(--shadow);
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 #searchInput::placeholder {
-    color: var(--text-secondary);
+    color: #92939d;
 }
 
 #searchInput:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.18);
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.12);
 }
 
 #searchButton {
@@ -122,7 +123,7 @@ button {
     border: none;
     border-radius: 8px;
     background-color: var(--accent);
-    color: white;
+    color: #ffffff;
     font-weight: 700;
     transition: background-color 0.2s, transform 0.2s;
 }
@@ -135,8 +136,6 @@ button {
 #searchButton:active {
     transform: translateY(0);
 }
-
-/* Optional search status / message area */
 
 #results {
     width: min(100%, 700px);
@@ -152,7 +151,7 @@ button {
 #filters {
     padding: 15px 5%;
     border-bottom: 1px solid var(--border-color);
-    background-color: var(--bg-primary);
+    background-color: rgba(255, 255, 255, 0.96);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -178,8 +177,8 @@ button {
     padding: 8px 20px;
     border: 1px solid var(--border-color);
     border-radius: 30px;
-    background-color: var(--bg-secondary);
-    color: var(--text-secondary);
+    background-color: #f7f7f9;
+    color: #656773;
     font-size: 0.9rem;
     text-transform: capitalize;
     cursor: pointer;
@@ -187,21 +186,20 @@ button {
 }
 
 #filters li:hover {
-    color: white;
+    color: var(--accent);
     border-color: var(--accent);
+    background-color: #fff4f4;
 }
-
-/* Add this class to the currently selected genre */
 
 #filters li.active {
     background-color: var(--accent);
-    color: white;
+    color: #ffffff;
     border-color: var(--accent);
 }
 
 
 /* =========================
-   4. MOVIE DISPLAY
+   4. MOVIE DISPLAY GRID
 ========================= */
 
 #movie-display {
@@ -217,10 +215,9 @@ button {
     align-items: start;
 }
 
+
 /* =========================
    5. MOVIE CARDS
-   Apply these classes to the
-   elements created by JavaScript
 ========================= */
 
 .movie-card {
@@ -229,14 +226,16 @@ button {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     background-color: var(--bg-card);
-    transition: transform 0.25s ease, border-color 0.25s ease,
+    box-shadow: 0 2px 8px rgba(25, 25, 35, 0.03);
+    transition: transform 0.25s ease,
+                border-color 0.25s ease,
                 box-shadow 0.25s ease;
 }
 
 .movie-card:hover {
-    transform: translateY(-6px);
-    border-color: #484856;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    transform: translateY(-5px);
+    border-color: #d1d2da;
+    box-shadow: 0 12px 28px rgba(25, 25, 35, 0.10);
 }
 
 .movie-poster {
@@ -244,7 +243,7 @@ button {
     width: 100%;
     aspect-ratio: 2 / 3;
     overflow: hidden;
-    background-color: var(--bg-secondary);
+    background-color: #ececf1;
 }
 
 .movie-poster img {
@@ -269,6 +268,7 @@ button {
     font-weight: 700;
     line-height: 1.4;
     overflow-wrap: anywhere;
+    color: var(--text-primary);
 }
 
 .movie-meta {
@@ -282,7 +282,7 @@ button {
 }
 
 .movie-rating {
-    color: #ffc857;
+    color: #a66b00;
     font-weight: 700;
     white-space: nowrap;
 }
@@ -293,7 +293,7 @@ button {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
     line-clamp: 3;
-    color: var(--text-secondary);
+    color: #686a75;
     font-size: 0.85rem;
     line-height: 1.6;
 }
@@ -303,15 +303,15 @@ button {
     margin-top: 12px;
     padding: 4px 9px;
     border-radius: 5px;
-    background-color: #29202a;
-    color: #f3a4ab;
+    background-color: #fff0f1;
+    color: #bf1720;
     font-size: 0.75rem;
     text-transform: capitalize;
 }
 
 
 /* =========================
-   6. EMPTY / LOADING STATES
+   6. LOADING / EMPTY / ERRORS
 ========================= */
 
 .empty-state,
@@ -324,7 +324,7 @@ button {
 }
 
 .error-state {
-    color: #ff7777;
+    color: #c62828;
 }
 
 
