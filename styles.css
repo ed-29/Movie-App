@@ -1,0 +1,377 @@
+
+/* =========================
+   1. GLOBAL STYLES
+========================= */
+
+:root {
+    --bg-primary: #5c5c86;
+    --bg-secondary: #0000009f;
+    --bg-card: #23232e;
+    --accent: #d000ff;
+    --accent-hover: #d000ffcc;
+    --text-primary: #ffffff;
+    --text-secondary: #a5a5b5;
+    --border-color: #2a2a36;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+
+/* =========================
+   2. HERO / SEARCH SECTION
+========================= */
+
+#hero-container {
+    position: relative;
+    min-height: 440px;
+    padding: 100px 20px 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* Background image */
+
+#hero-image {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+}
+
+#hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 35%;
+}
+
+/* Dark overlay for readable text */
+
+#hero-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(11, 11, 15, 0.55),
+        rgba(11, 11, 15, 0.85) 65%,
+        var(--bg-primary)
+    );
+    z-index: -1;
+}
+
+#hero-container h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.2;
+}
+
+#searchInput {
+    width: min(100%, 480px);
+    padding: 15px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    outline: none;
+    background: rgba(20, 20, 28, 0.9);
+    color: var(--text-primary);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#searchInput::placeholder {
+    color: var(--text-secondary);
+}
+
+#searchInput:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.18);
+}
+
+#searchButton {
+    padding: 12px 32px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--accent);
+    color: white;
+    font-weight: 700;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+#searchButton:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+#searchButton:active {
+    transform: translateY(0);
+}
+
+/* Optional search status / message area */
+
+#results {
+    width: min(100%, 700px);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+
+/* =========================
+   3. GENRE FILTERS
+========================= */
+
+#filters {
+    padding: 15px 5%;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#filters ul {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    list-style: none;
+    overflow-x: auto;
+    padding: 5px 0;
+    scrollbar-width: none;
+}
+
+#filters ul::-webkit-scrollbar {
+    display: none;
+}
+
+#filters li {
+    flex-shrink: 0;
+    padding: 8px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 30px;
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: capitalize;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#filters li:hover {
+    color: white;
+    border-color: var(--accent);
+}
+
+/* Add this class to the currently selected genre */
+
+#filters li.active {
+    background-color: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+
+/* =========================
+   4. MOVIE DISPLAY
+========================= */
+
+#movie-display {
+    width: min(1400px, 100%);
+    margin: 0 auto;
+    padding: 35px 5% 60px;
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(min(100%, 190px), 1fr)
+    );
+    gap: 28px 22px;
+    align-items: start;
+}
+
+/* =========================
+   5. MOVIE CARDS
+   Apply these classes to the
+   elements created by JavaScript
+========================= */
+
+.movie-card {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--bg-card);
+    transition: transform 0.25s ease, border-color 0.25s ease,
+                box-shadow 0.25s ease;
+}
+
+.movie-card:hover {
+    transform: translateY(-6px);
+    border-color: #484856;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.movie-poster {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background-color: var(--bg-secondary);
+}
+
+.movie-poster img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.movie-card:hover .movie-poster img {
+    transform: scale(1.05);
+}
+
+.movie-info {
+    padding: 15px;
+}
+
+.movie-title {
+    margin-bottom: 6px;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.movie-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.movie-rating {
+    color: #ffc857;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.movie-description {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.movie-genre {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 4px 9px;
+    border-radius: 5px;
+    background-color: #29202a;
+    color: #f3a4ab;
+    font-size: 0.75rem;
+    text-transform: capitalize;
+}
+
+
+/* =========================
+   6. EMPTY / LOADING STATES
+========================= */
+
+.empty-state,
+.loading-state,
+.error-state {
+    grid-column: 1 / -1;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.error-state {
+    color: #ff7777;
+}
+
+
+/* =========================
+   7. RESPONSIVE DESIGN
+========================= */
+
+@media (max-width: 768px) {
+    #hero-container {
+        min-height: 380px;
+        padding: 75px 20px 55px;
+    }
+
+    #filters {
+        padding-inline: 16px;
+    }
+
+    #filters ul {
+        justify-content: flex-start;
+    }
+
+    #movie-display {
+        padding: 25px 16px 45px;
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(min(100%, 155px), 1fr)
+        );
+        gap: 20px 14px;
+    }
+
+    .movie-info {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 380px) {
+    #movie-display {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding-inline: 12px;
+    }
+
+    .movie-title {
+        font-size: 0.9rem;
+    }
+
+    .movie-meta {
+        font-size: 0.75rem;
+    }
+}
