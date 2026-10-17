@@ -9,10 +9,10 @@
 <body>
     <div id="hero-container">
         <div id="hero-image">
-            <img src="https://images.unsplash.com/photo-1601758123927-0c3f9b1d2a8e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW92aWV8ZW58MHx8MHx8&w=1000&q=80" alt="Movie Background">    
+            <img src="img/poster.jpg" alt="movie background">       
         </div>
-        <h1>Movie Search App</h1>
-        <input type="text" id="searchInput" placeholder="Search for a movie...">
+        <h1>The Movie You Want Is One Search Away</h1>
+        <input type="text" id="searchInput" value="hehe" placeholder="Search for a movie...">
         <button id="searchButton">Search</button>
         <div id="results"></div>
     </div>
@@ -27,9 +27,20 @@
         </ul>
     </div>
     <div id="movie-display">
-        <div id="movie-cards">
+        <div class="movie-card">
             <!-- Movie cards will be dynamically inserted here -->
-
+                <div class="movie-poster">
+                    <img src="img/poster.jpg" alt="">
+                </div>
+                <div class="movie-info">
+                    <div class="movie-title"><h3>title</h3></div>
+                    <div class="movie-meta">
+                        <div class="movie-rating">5 stars</div>
+                        <div class="movie-discription">blah, blah, blah</div>
+                        <div class="movie-genre">horror</div>
+                        
+                    </div>
+                </div>
         </div>
     </div>
 </body>
