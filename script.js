@@ -1,6 +1,7 @@
 const searchInput = document.getElementById("searchInput").value;
 const searchButton = document.getElementById("searchButton");
 const genreFilter = document.querySelectorAll("#filters li");
+const movieDisplay = document.getElementById("movie-display");
 
 
 const movies = [
@@ -85,4 +86,70 @@ const movies = [
         description: "A family struggles to survive in a world where deadly creatures hunt by sound."
     }
 ];
-console.log(movies[0]);
+
+
+//display all movies on page load
+movies.forEach((movie) => {
+    movieDisplay.insertAdjacentHTML('beforeend', `<div class="movie-card">
+                            <div class="movie-poster">
+                                <img src="${movie.poster}" alt="${movie.title}">
+                            </div>
+                            <div class="movie-info">
+                                <div class="movie-title"><h3>${movie.title}</h3></div>
+                                <div class="movie-meta">
+                                    <div class="movie-rating">${movie.rating} stars</div>
+                                    <div class="movie-year">${movie.year}</div>
+                                    <div class="movie-discription">${movie.description}</div>
+                                    <div class="movie-genre">${movie.genre}</div>
+                                    
+                                </div>
+                            </div>
+                        </div>`);
+
+                        
+});
+
+
+// Create a poster strip for the hero section
+const posterTrack = document.getElementById("poster-track");
+
+const posterImages = movies
+    .map(movie => movie.poster)
+    .filter(poster => poster);
+
+function createPosterStrip() {
+    // Duplicate the posters to create a continuous loop
+    const allPosters = [...posterImages, ...posterImages];
+
+    posterTrack.innerHTML = allPosters
+        .map(poster => `<img src="${poster}" alt="" aria-hidden="true">`)
+        .join("");
+}
+
+createPosterStrip();
+
+//add dark mode toggle functionality
+const themeToggle = document.getElementById("theme-toggle");
+const savedTheme = localStorage.getItem("theme") || "light";
+
+document.documentElement.setAttribute("data-theme", savedTheme);
+
+updateThemeButton(savedTheme);
+
+function updateThemeButton(theme) {
+    themeToggle.textContent =
+        theme === "dark" ? "Light Mode" : "Dark Mode";
+}
+
+themeToggle.addEventListener("click", () => {
+    const currentTheme =
+        document.documentElement.getAttribute("data-theme");
+
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+    document.documentElement.setAttribute("data-theme", newTheme);
+
+    localStorage.setItem("theme", newTheme);
+
+    updateThemeButton(newTheme);
+});
