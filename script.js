@@ -1,6 +1,6 @@
 const searchInput = document.getElementById("searchInput").value;
 const searchButton = document.getElementById("searchButton");
-const genreFilter = document.querySelectorAll("#filters li");
+const genreFilter = document.querySelector("#filters");
 const movieDisplay = document.getElementById("movie-display");
 
 
@@ -99,7 +99,7 @@ movies.forEach((movie) => {
                                 <div class="movie-meta">
                                     <div class="movie-rating">${movie.rating} stars</div>
                                     <div class="movie-year">${movie.year}</div>
-                                    <div class="movie-discription">${movie.description}</div>
+                                    <div class="movie-description">${movie.description}</div>
                                     <div class="movie-genre">${movie.genre}</div>
                                     
                                 </div>
@@ -153,3 +153,38 @@ themeToggle.addEventListener("click", () => {
 
     updateThemeButton(newTheme);
 });
+
+searchButton.addEventListener("click", () => {
+    const searchInput = document.getElementById("searchInput").value.toLowerCase();
+    const filteredMovies = movies.filter(movie => movie.title.toLowerCase().includes(searchInput));
+    displayMovies(filteredMovies);
+    genreFilter.style.display = "none";
+    movieDisplay.insertAdjacentHTML('afterbegin', `<div class="search-result-description">
+                                <h3>Results for "${searchInput}"</h3>
+                            </div>`); // Hide genre filter when searching
+});
+
+displayMovies(movies);
+
+function displayMovies(moviesToDisplay) { 
+    movieDisplay.innerHTML = "";
+    moviesToDisplay.forEach((movie) => {
+        movieDisplay.insertAdjacentHTML('beforeend', `
+                            
+                            <div class="movie-card">
+                                <div class="movie-poster">
+                                    <img src="${movie.poster}" alt="${movie.title}">
+                                </div>
+                                <div class="movie-info">
+                                    <div class="movie-title"><h3>${movie.title}</h3></div>
+                                    <div class="movie-meta">
+                                        <div class="movie-rating">${movie.rating} stars</div>
+                                        <div class="movie-year">${movie.year}</div>
+                                        <div class="movie-description">${movie.description}</div>
+                                        <div class="movie-genre">${movie.genre}</div>
+                                    </div>
+                                </div>
+                            </div>`);
+    });
+
+}

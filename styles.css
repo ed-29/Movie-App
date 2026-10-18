@@ -136,6 +136,14 @@ input {
 button {
     cursor: pointer;
 }
+.search-result-description {
+    grid-column: 1 / -1;
+    padding: 20px 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+}
 
 
 /* =========================
