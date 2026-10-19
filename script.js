@@ -156,6 +156,7 @@ themeToggle.addEventListener("click", () => {
 
 //smart search functionality
 const searchSuggestions = document.getElementById("search-suggestions");
+let activeSuggestionIndex = -1;
 
 searchInput.addEventListener("input", () => {
     const searchValue = searchInput.value.toLowerCase().trim();
@@ -163,22 +164,85 @@ searchInput.addEventListener("input", () => {
         movie.title.toLowerCase().includes(searchValue)
     );
 
+    activeSuggestionIndex = -1;
     // displayMovies(matchingMovies);
     displaySearchSuggestions(searchValue ? matchingMovies.slice(0, 5) : []);
 });
 
+searchInput.addEventListener("keydown", event => {
+    const suggestions = getSuggestionItems();
+
+    if (event.key === "ArrowDown" && suggestions.length) {
+        event.preventDefault();
+        activeSuggestionIndex = activeSuggestionIndex < suggestions.length - 1
+            ? activeSuggestionIndex + 1
+            : 0;
+        updateActiveSuggestion(suggestions);
+    } else if (event.key === "ArrowUp" && suggestions.length) {
+        event.preventDefault();
+        activeSuggestionIndex = activeSuggestionIndex > 0
+            ? activeSuggestionIndex - 1
+            : suggestions.length - 1;
+        updateActiveSuggestion(suggestions);
+    } else if (event.key === "Enter") {
+        event.preventDefault();
+        if (activeSuggestionIndex >= 0 && suggestions[activeSuggestionIndex]) {
+            selectSuggestion(suggestions[activeSuggestionIndex]);
+        } else {
+            searchButton.click();
+        }
+    } else if (event.key === "Escape") {
+        closeSuggestions();
+    }
+});
+
+function getSuggestionItems() {
+    return Array.from(searchSuggestions.querySelectorAll(".search-suggestion-item"));
+}
+
+function updateActiveSuggestion(suggestions) {
+    suggestions.forEach((suggestion, index) => {
+        const isActive = index === activeSuggestionIndex;
+        suggestion.classList.toggle("is-active", isActive);
+        suggestion.setAttribute("aria-selected", String(isActive));
+    });
+
+    const activeSuggestion = suggestions[activeSuggestionIndex];
+    searchInput.setAttribute("aria-activedescendant", activeSuggestion.id);
+    activeSuggestion.scrollIntoView({ block: "nearest" });
+}
+
+function closeSuggestions() {
+    activeSuggestionIndex = -1;
+    searchSuggestions.replaceChildren();
+    searchInput.setAttribute("aria-expanded", "false");
+    searchInput.removeAttribute("aria-activedescendant");
+}
+
+function selectSuggestion(suggestion) {
+    searchInput.value = suggestion.dataset.movieTitle;
+    closeSuggestions();
+    searchButton.click();
+}
+
 function displaySearchSuggestions(suggestions) {
     searchSuggestions.replaceChildren();
 
-    suggestions.forEach(movie => {
+    suggestions.forEach((movie, index) => {
         const suggestionItem = document.createElement("div");
         suggestionItem.classList.add("search-suggestion-item");
+        suggestionItem.id = `movie-suggestion-${index}`;
+        suggestionItem.setAttribute("role", "option");
+        suggestionItem.setAttribute("aria-selected", "false");
         suggestionItem.dataset.movieTitle = movie.title;
         suggestionItem.innerHTML = `<div class="search-suggestion-poster"><img src="${movie.poster}" alt=""></div>
                                     <div class="search-suggestion-title">${movie.title}</div>
                                     <div class="search-suggestion-year">${movie.year}</div>`;
         searchSuggestions.appendChild(suggestionItem);
     });
+
+    searchInput.setAttribute("aria-expanded", String(suggestions.length > 0));
+    searchInput.removeAttribute("aria-activedescendant");
 }
 
 searchSuggestions.addEventListener("click", event => {
@@ -188,9 +252,7 @@ searchSuggestions.addEventListener("click", event => {
         return;
     }
 
-    searchInput.value = suggestionItem.dataset.movieTitle;
-    searchSuggestions.replaceChildren();
-    searchButton.click();
+    selectSuggestion(suggestionItem);
 });
 
 
@@ -202,7 +264,7 @@ searchButton.addEventListener("click", () => {
         movie.title.toLowerCase().includes(normalizedSearchValue)
     );
 
-    searchSuggestions.replaceChildren();
+    closeSuggestions();
     displayMovies(matchingMovies);
     genreFilter.style.display = "none";
     movieDisplay.insertAdjacentHTML('afterbegin', `<div class="search-result-description">
