@@ -1,4 +1,4 @@
-const searchInput = document.getElementById("searchInput").value;
+const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
 const genreFilter = document.querySelector("#filters");
 const movieDisplay = document.getElementById("movie-display");
@@ -154,6 +154,20 @@ themeToggle.addEventListener("click", () => {
     updateThemeButton(newTheme);
 });
 
+//smart search functionality
+searchInput.addEventListener("input", () => {
+    const searchValue = searchInput.value.toLowerCase().trim();
+
+    const filteredMovies = movies.filter(movie => movie.title.toLowerCase().includes(searchValue)).slice(0, 5); // Limit to 5 suggestions
+    if (searchValue) {
+        displayMovies(filteredMovies);
+    } else {
+        displayMovies(movies);
+    }
+});
+
+
+//search functionality
 searchButton.addEventListener("click", () => {
     const searchInput = document.getElementById("searchInput").value.toLowerCase();
     const filteredMovies = movies.filter(movie => movie.title.toLowerCase().includes(searchInput));
