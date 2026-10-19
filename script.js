@@ -155,27 +155,59 @@ themeToggle.addEventListener("click", () => {
 });
 
 //smart search functionality
+const searchSuggestions = document.getElementById("search-suggestions");
+
 searchInput.addEventListener("input", () => {
     const searchValue = searchInput.value.toLowerCase().trim();
+    const matchingMovies = movies.filter(movie =>
+        movie.title.toLowerCase().includes(searchValue)
+    );
 
-    const filteredMovies = movies.filter(movie => movie.title.toLowerCase().includes(searchValue)).slice(0, 5); // Limit to 5 suggestions
-    if (searchValue) {
-        displayMovies(filteredMovies);
-    } else {
-        displayMovies(movies);
+    // displayMovies(matchingMovies);
+    displaySearchSuggestions(searchValue ? matchingMovies.slice(0, 5) : []);
+});
+
+function displaySearchSuggestions(suggestions) {
+    searchSuggestions.replaceChildren();
+
+    suggestions.forEach(movie => {
+        const suggestionItem = document.createElement("div");
+        suggestionItem.classList.add("search-suggestion-item");
+        suggestionItem.dataset.movieTitle = movie.title;
+        suggestionItem.innerHTML = `<div class="search-suggestion-poster"><img src="${movie.poster}" alt=""></div>
+                                    <div class="search-suggestion-title">${movie.title}</div>
+                                    <div class="search-suggestion-year">${movie.year}</div>`;
+        searchSuggestions.appendChild(suggestionItem);
+    });
+}
+
+searchSuggestions.addEventListener("click", event => {
+    const suggestionItem = event.target.closest(".search-suggestion-item");
+
+    if (!suggestionItem) {
+        return;
     }
+
+    searchInput.value = suggestionItem.dataset.movieTitle;
+    searchSuggestions.replaceChildren();
+    searchButton.click();
 });
 
 
 //search functionality
 searchButton.addEventListener("click", () => {
-    const searchInput = document.getElementById("searchInput").value.toLowerCase();
-    const filteredMovies = movies.filter(movie => movie.title.toLowerCase().includes(searchInput));
-    displayMovies(filteredMovies);
+    const searchValue = searchInput.value.trim();
+    const normalizedSearchValue = searchValue.toLowerCase();
+    const matchingMovies = movies.filter(movie =>
+        movie.title.toLowerCase().includes(normalizedSearchValue)
+    );
+
+    searchSuggestions.replaceChildren();
+    displayMovies(matchingMovies);
     genreFilter.style.display = "none";
     movieDisplay.insertAdjacentHTML('afterbegin', `<div class="search-result-description">
-                                <h3>Results for "${searchInput}"</h3>
-                            </div>`); // Hide genre filter when searching
+                                <h3>Results for "${searchValue}"</h3>
+                            </div>`);
 });
 
 displayMovies(movies);

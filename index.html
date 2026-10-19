@@ -7,17 +7,22 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <nav class="top-nav" aria-label="Main navigation">
+        <a class="site-brand" href="#" aria-label="Movie Finder home">Movie<span>Finder</span></a>
+        <div class="search-area">
+            <div class="search-row">
+                <input type="text" id="searchInput" placeholder="Search for a movie..." aria-label="Search movies">
+                <button id="searchButton" type="button">Search</button>
+            </div>
+            <div id="search-suggestions"></div>
+        </div>
+        <button id="theme-toggle" type="button">Dark Mode</button>
+    </nav>
     <div id="hero-container">
-        <button id="theme-toggle" type="button">
-    Dark Mode
-</button>
         <div id="hero-image">
                 <div id="poster-track"></div>
         </div>
         <h1>The Movie You Want Is One Search Away</h1>
-        
-        <input type="text" id="searchInput" type="" placeholder="Search for a movie...">
-        <button id="searchButton">Search</button>
         <div id="results"></div>
     </div>
     <div id="filters">
