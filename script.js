@@ -10,6 +10,7 @@ const movies = [
         year: 2010,
         genre: "action",
         rating: 8.8,
+        actors: ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Elliot Page"],
         poster: "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
         description: "A thief enters people's dreams to steal secrets and is tasked with planting an idea in someone's mind."
     },
@@ -18,6 +19,7 @@ const movies = [
         year: 2008,
         genre: "action",
         rating: 9.0,
+        actors: ["Christian Bale", "Heath Ledger", "Aaron Eckhart"],
         poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
         description: "Batman faces the Joker, a criminal mastermind who throws Gotham City into chaos."
     },
@@ -26,6 +28,7 @@ const movies = [
         year: 2009,
         genre: "comedy",
         rating: 7.7,
+        actors: ["Bradley Cooper", "Ed Helms", "Zach Galifianakis"],
         poster: "https://image.tmdb.org/t/p/w500/uluhlXubGu1VxU63X9VHCLWDAYP.jpg",
         description: "Three friends wake up after a wild bachelor party in Las Vegas and try to find the missing groom."
     },
@@ -34,6 +37,7 @@ const movies = [
         year: 2006,
         genre: "drama",
         rating: 8.0,
+        actors: ["Will Smith", "Jaden Smith", "Thandiwe Newton"],
         poster: "https://image.tmdb.org/t/p/w500/lBYOKAMcxIvuk9s9hMuecB9dPBV.jpg",
         description: "A struggling father works to build a better life for himself and his young son."
     },
@@ -42,6 +46,7 @@ const movies = [
         year: 2014,
         genre: "drama",
         rating: 8.7,
+        actors: ["Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"],
         poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
         description: "A team of explorers travels through a wormhole in search of a new home for humanity."
     },
@@ -50,6 +55,7 @@ const movies = [
         year: 2013,
         genre: "horror",
         rating: 7.5,
+        actors: ["Vera Farmiga", "Patrick Wilson", "Lili Taylor"],
         poster: "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg",
         description: "Paranormal investigators help a family experiencing disturbing events in their farmhouse."
     },
@@ -58,6 +64,7 @@ const movies = [
         year: 1997,
         genre: "romance",
         rating: 7.9,
+        actors: ["Leonardo DiCaprio", "Kate Winslet", "Billy Zane"],
         poster: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
         description: "Two young people from different social backgrounds fall in love aboard the ill-fated Titanic."
     },
@@ -66,6 +73,7 @@ const movies = [
         year: 2004,
         genre: "romance",
         rating: 7.8,
+        actors: ["Ryan Gosling", "Rachel McAdams", "James Garner"],
         poster: "https://image.tmdb.org/t/p/w500/rpzFxv78UvYG5yQba2soO9ODXxw.jpg",
         description: "A young couple's enduring love story unfolds across years of separation and hardship."
     },
@@ -74,6 +82,7 @@ const movies = [
         year: 2007,
         genre: "comedy",
         rating: 7.6,
+        actors: ["Jonah Hill", "Michael Cera", "Christopher Mintz-Plasse"],
         poster: "https://image.tmdb.org/t/p/w500/ek8e8txUyUwd2BNqj6lFEerJfbq.jpg",
         description: "Two high school friends try to make the most of their final days before graduation."
     },
@@ -82,6 +91,7 @@ const movies = [
         year: 2018,
         genre: "horror",
         rating: 7.5,
+        actors: ["Emily Blunt", "John Krasinski", "Millicent Simmonds"],
         poster: "https://image.tmdb.org/t/p/w500/nAU74GmpUk7t5iklEp3bufwDq4n.jpg",
         description: "A family struggles to survive in a world where deadly creatures hunt by sound."
     }
@@ -156,6 +166,8 @@ themeToggle.addEventListener("click", () => {
 
 //smart search functionality
 const searchSuggestions = document.getElementById("search-suggestions");
+const movieDetails = document.getElementById("movie-details");
+const movieDetailsContent = document.getElementById("movie-details-content");
 let activeSuggestionIndex = -1;
 
 searchInput.addEventListener("input", () => {
@@ -169,6 +181,7 @@ searchInput.addEventListener("input", () => {
     displaySearchSuggestions(searchValue ? matchingMovies.slice(0, 5) : []);
 });
 
+// Handle keyboard navigation for search suggestions
 searchInput.addEventListener("keydown", event => {
     const suggestions = getSuggestionItems();
 
@@ -220,9 +233,8 @@ function closeSuggestions() {
 }
 
 function selectSuggestion(suggestion) {
-    searchInput.value = suggestion.dataset.movieTitle;
     closeSuggestions();
-    searchButton.click();
+    showMovieDetails(suggestion.dataset.movieTitle);
 }
 
 function displaySearchSuggestions(suggestions) {
@@ -255,6 +267,54 @@ searchSuggestions.addEventListener("click", event => {
     selectSuggestion(suggestionItem);
 });
 
+function showMovieDetails(title) {
+    const movie = movies.find(item => item.title === title);
+
+    if (!movie) {
+        return;
+    }
+
+    movieDetailsContent.innerHTML = `
+        <div class="details-poster">
+            <img src="${movie.poster}" alt="Poster for ${movie.title}">
+        </div>
+        <div class="details-info">
+            <p class="details-eyebrow">Movie details</p>
+            <h2 id="details-title">${movie.title}</h2>
+            <div class="details-meta">
+                <span>${movie.year}</span>
+                <span>${movie.rating} / 10</span>
+                <span class="movie-genre">${movie.genre}</span>
+            </div>
+            <h3>Lead actors</h3>
+            <p class="details-actors">${movie.actors.join(", ")}</p>
+            <h3>Overview</h3>
+            <p class="details-description">${movie.description}</p>
+        </div>`;
+
+    movieDetails.showModal();
+}
+
+movieDetails.querySelector(".details-close").addEventListener("click", () => {
+    movieDetails.close();
+});
+
+movieDisplay.addEventListener("click", event => {
+    const movieCard = event.target.closest(".movie-card");
+
+    if (movieCard) {
+        showMovieDetails(movieCard.dataset.movieTitle);
+    }
+});
+
+movieDisplay.addEventListener("keydown", event => {
+    if ((event.key === "Enter" || event.key === " ") &&
+        event.target.matches(".movie-card")) {
+        event.preventDefault();
+        showMovieDetails(event.target.dataset.movieTitle);
+    }
+});
+
 
 //search functionality
 searchButton.addEventListener("click", () => {
@@ -279,7 +339,8 @@ function displayMovies(moviesToDisplay) {
     moviesToDisplay.forEach((movie) => {
         movieDisplay.insertAdjacentHTML('beforeend', `
                             
-                            <div class="movie-card">
+                            <div class="movie-card" data-movie-title="${movie.title}" role="button" tabindex="0"
+                                 aria-label="View details for ${movie.title}">
                                 <div class="movie-poster">
                                     <img src="${movie.poster}" alt="${movie.title}">
                                 </div>
