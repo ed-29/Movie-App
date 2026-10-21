@@ -2,6 +2,7 @@ const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
 const genreFilter = document.querySelector("#filters");
 const movieDisplay = document.getElementById("movie-display");
+const newestMovieList = document.getElementById("newest-movie-list");
 
 
 const movies = [
@@ -137,6 +138,30 @@ function createPosterStrip() {
 }
 
 createPosterStrip();
+
+function movieCardMarkup(movie) {
+    return `
+        <div class="movie-card" data-movie-title="${movie.title}" role="button" tabindex="0"
+             aria-label="View details for ${movie.title}">
+            <div class="movie-poster">
+                <img src="${movie.poster}" alt="${movie.title}">
+            </div>
+            <div class="movie-info">
+                <div class="movie-title"><h3>${movie.title}</h3></div>
+                <div class="movie-meta">
+                    <div class="movie-rating">${movie.rating} stars</div>
+                    <div class="movie-year">${movie.year}</div>
+                    <div class="movie-description">${movie.description}</div>
+                    <div class="movie-genre">${movie.genre}</div>
+                </div>
+            </div>
+        </div>`;
+}
+
+const newestMovies = [...movies]
+    .sort((first, second) => second.year - first.year)
+    .slice(0, 4);
+newestMovieList.innerHTML = newestMovies.map(movieCardMarkup).join("");
 
 //add dark mode toggle functionality
 const themeToggle = document.getElementById("theme-toggle");
@@ -307,7 +332,23 @@ movieDisplay.addEventListener("click", event => {
     }
 });
 
+newestMovieList.addEventListener("click", event => {
+    const movieCard = event.target.closest(".movie-card");
+
+    if (movieCard) {
+        showMovieDetails(movieCard.dataset.movieTitle);
+    }
+});
+
 movieDisplay.addEventListener("keydown", event => {
+    if ((event.key === "Enter" || event.key === " ") &&
+        event.target.matches(".movie-card")) {
+        event.preventDefault();
+        showMovieDetails(event.target.dataset.movieTitle);
+    }
+});
+
+newestMovieList.addEventListener("keydown", event => {
     if ((event.key === "Enter" || event.key === " ") &&
         event.target.matches(".movie-card")) {
         event.preventDefault();
@@ -343,25 +384,7 @@ searchButton.addEventListener("click", () => {
 displayMovies(movies);
 
 function displayMovies(moviesToDisplay) {
-    movieDisplay.innerHTML = "";
-    moviesToDisplay.forEach((movie) => {
-        movieDisplay.insertAdjacentHTML('beforeend', `
-                            <div class="movie-card" data-movie-title="${movie.title}" role="button" tabindex="0"
-                                 aria-label="View details for ${movie.title}">
-                                <div class="movie-poster">
-                                    <img src="${movie.poster}" alt="${movie.title}">
-                                </div>
-                                <div class="movie-info">
-                                    <div class="movie-title"><h3>${movie.title}</h3></div>
-                                    <div class="movie-meta">
-                                        <div class="movie-rating">${movie.rating} stars</div>
-                                        <div class="movie-year">${movie.year}</div>
-                                        <div class="movie-description">${movie.description}</div>
-                                        <div class="movie-genre">${movie.genre}</div>
-                                    </div>
-                                </div>
-                            </div>`);
-    });
+    movieDisplay.innerHTML = moviesToDisplay.map(movieCardMarkup).join("");
 }
 
 //filter functionality
