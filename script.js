@@ -327,18 +327,25 @@ searchButton.addEventListener("click", () => {
     closeSuggestions();
     displayMovies(matchingMovies);
     genreFilter.style.display = "none";
-    movieDisplay.insertAdjacentHTML('afterbegin', `<div class="search-result-description">
+
+    const existingDescription = document.querySelector(".search-result-description");
+    if (existingDescription) {
+        existingDescription.remove();
+    }
+
+    if (searchValue) {
+        movieDisplay.insertAdjacentHTML('afterbegin', `<div class="search-result-description">
                                 <h3>Results for "${searchValue}"</h3>
                             </div>`);
+    }
 });
 
 displayMovies(movies);
 
-function displayMovies(moviesToDisplay) { 
+function displayMovies(moviesToDisplay) {
     movieDisplay.innerHTML = "";
     moviesToDisplay.forEach((movie) => {
         movieDisplay.insertAdjacentHTML('beforeend', `
-                            
                             <div class="movie-card" data-movie-title="${movie.title}" role="button" tabindex="0"
                                  aria-label="View details for ${movie.title}">
                                 <div class="movie-poster">
@@ -355,5 +362,25 @@ function displayMovies(moviesToDisplay) {
                                 </div>
                             </div>`);
     });
-
 }
+
+//filter functionality
+function filterMoviesByGenre(genre) {
+    const filteredMovies = genre === "all" ? movies : movies.filter(movie => movie.genre === genre);
+    return filteredMovies;
+}
+
+const filters = document.getElementById("filters").querySelectorAll("li");
+filters.forEach((filter) => {
+    filter.addEventListener("click", (event) => {
+        const selectedGenre = event.currentTarget.dataset.genre;
+        const filteredMovies = filterMoviesByGenre(selectedGenre);
+
+        filters.forEach((item) => {
+            item.classList.toggle("active", item === event.currentTarget);
+        });
+
+        genreFilter.style.display = "block";
+        displayMovies(filteredMovies);
+    });
+});
