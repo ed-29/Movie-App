@@ -5,100 +5,15 @@ const movieDisplay = document.getElementById("movie-display");
 const newestMovieList = document.getElementById("newest-movie-list");
 
 
-const movies = [
-    {
-        title: "Inception",
-        year: 2010,
-        genre: "action",
-        rating: 8.8,
-        actors: ["Leonardo DiCaprio", "Joseph Gordon-Levitt", "Elliot Page"],
-        poster: "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
-        description: "A thief enters people's dreams to steal secrets and is tasked with planting an idea in someone's mind."
-    },
-    {
-        title: "The Dark Knight",
-        year: 2008,
-        genre: "action",
-        rating: 9.0,
-        actors: ["Christian Bale", "Heath Ledger", "Aaron Eckhart"],
-        poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-        description: "Batman faces the Joker, a criminal mastermind who throws Gotham City into chaos."
-    },
-    {
-        title: "The Hangover",
-        year: 2009,
-        genre: "comedy",
-        rating: 7.7,
-        actors: ["Bradley Cooper", "Ed Helms", "Zach Galifianakis"],
-        poster: "https://image.tmdb.org/t/p/w500/uluhlXubGu1VxU63X9VHCLWDAYP.jpg",
-        description: "Three friends wake up after a wild bachelor party in Las Vegas and try to find the missing groom."
-    },
-    {
-        title: "The Pursuit of Happyness",
-        year: 2006,
-        genre: "drama",
-        rating: 8.0,
-        actors: ["Will Smith", "Jaden Smith", "Thandiwe Newton"],
-        poster: "https://image.tmdb.org/t/p/w500/lBYOKAMcxIvuk9s9hMuecB9dPBV.jpg",
-        description: "A struggling father works to build a better life for himself and his young son."
-    },
-    {
-        title: "Interstellar",
-        year: 2014,
-        genre: "drama",
-        rating: 8.7,
-        actors: ["Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"],
-        poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-        description: "A team of explorers travels through a wormhole in search of a new home for humanity."
-    },
-    {
-        title: "The Conjuring",
-        year: 2013,
-        genre: "horror",
-        rating: 7.5,
-        actors: ["Vera Farmiga", "Patrick Wilson", "Lili Taylor"],
-        poster: "https://image.tmdb.org/t/p/w500/wVYREutTvI2tmxr6ujrHT704wGF.jpg",
-        description: "Paranormal investigators help a family experiencing disturbing events in their farmhouse."
-    },
-    {
-        title: "Titanic",
-        year: 1997,
-        genre: "romance",
-        rating: 7.9,
-        actors: ["Leonardo DiCaprio", "Kate Winslet", "Billy Zane"],
-        poster: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
-        description: "Two young people from different social backgrounds fall in love aboard the ill-fated Titanic."
-    },
-    {
-        title: "The Notebook",
-        year: 2004,
-        genre: "romance",
-        rating: 7.8,
-        actors: ["Ryan Gosling", "Rachel McAdams", "James Garner"],
-        poster: "https://image.tmdb.org/t/p/w500/rpzFxv78UvYG5yQba2soO9ODXxw.jpg",
-        description: "A young couple's enduring love story unfolds across years of separation and hardship."
-    },
-    {
-        title: "Superbad",
-        year: 2007,
-        genre: "comedy",
-        rating: 7.6,
-        actors: ["Jonah Hill", "Michael Cera", "Christopher Mintz-Plasse"],
-        poster: "https://image.tmdb.org/t/p/w500/ek8e8txUyUwd2BNqj6lFEerJfbq.jpg",
-        description: "Two high school friends try to make the most of their final days before graduation."
-    },
-    {
-        title: "A Quiet Place",
-        year: 2018,
-        genre: "horror",
-        rating: 7.5,
-        actors: ["Emily Blunt", "John Krasinski", "Millicent Simmonds"],
-        poster: "https://image.tmdb.org/t/p/w500/nAU74GmpUk7t5iklEp3bufwDq4n.jpg",
-        description: "A family struggles to survive in a world where deadly creatures hunt by sound."
-    }
-];
+let movies = [];
 
-
+const genreMap = {
+        28: "action",
+        35: "comedy",
+        18: "drama",
+        27: "horror",
+        10749: "romance"
+    };
 //display all movies on page load
 movies.forEach((movie) => {
     movieDisplay.insertAdjacentHTML('beforeend', `<div class="movie-card">
@@ -111,7 +26,7 @@ movies.forEach((movie) => {
                                     <div class="movie-rating">${movie.rating} stars</div>
                                     <div class="movie-year">${movie.year}</div>
                                     <div class="movie-description">${movie.description}</div>
-                                    <div class="movie-genre">${movie.genre}</div>
+                                    <div class="movie-genre">${movie.genre.some(id => genreMap[id])}</div>
                                     
                                 </div>
                             </div>
@@ -361,12 +276,10 @@ newestMovieList.addEventListener("keydown", event => {
 searchButton.addEventListener("click", () => {
     const searchValue = searchInput.value.trim();
     const normalizedSearchValue = searchValue.toLowerCase();
-    const matchingMovies = movies.filter(movie =>
-        movie.title.toLowerCase().includes(normalizedSearchValue)
-    );
+    if (!searchValue) return;
+    searchMovies(normalizedSearchValue);
 
     closeSuggestions();
-    displayMovies(matchingMovies);
     genreFilter.style.display = "none";
 
     const existingDescription = document.querySelector(".search-result-description");
@@ -389,7 +302,20 @@ function displayMovies(moviesToDisplay) {
 
 //filter functionality
 function filterMoviesByGenre(genre) {
-    const filteredMovies = genre === "all" ? movies : movies.filter(movie => movie.genre === genre);
+    const genreMap = {
+        28: "action",
+        35: "comedy",
+        18: "drama",
+        27: "horror",
+        10749: "romance"
+    };
+
+    const filteredMovies = genre === "all"
+        ? movies
+        : movies.filter(movie =>
+            movie.genre.some(id => genreMap[id] === genre)
+        );
+
     return filteredMovies;
 }
 
@@ -407,3 +333,58 @@ filters.forEach((filter) => {
         displayMovies(filteredMovies);
     });
 });
+
+
+async function fetchPopularMovies(){
+   const response = await fetch("https://api.themoviedb.org/3/movie/popular",
+    {
+        headers: {
+            Authorization :`Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiMGJlYzI4YzBhMjNiMTEwNDZjMjdmYzI0YjQxNGNjOSIsIm5iZiI6MTc0NDAwOTcwNS4yOTksInN1YiI6IjY3ZjM3OWU5N2I0M2JkY2UyMGFkMjdjMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.9DmsGx94V5itCcE1395vOs24F9mkWjd_KOtldnwGizY`,
+            accept : "application/json"
+        }
+    }
+     );
+     const data = await response.json();
+     const formatedMovies = data.results.map(movie =>({
+        title: movie.title,
+        poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        rating: movie.vote_average,
+        year: movie.release_date.split("-")[0],
+        genre: movie.genre_ids,
+        description: movie.overview
+     }));
+// console.log(formatedMovies);
+
+movies = formatedMovies;
+displayMovies(formatedMovies);
+
+
+}
+fetchPopularMovies();
+// displayMovies(formatedMovies);
+
+async function searchMovies(searchTerm){
+    const response = await fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(searchTerm)}`, {
+        headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiMGJlYzI4YzBhMjNiMTEwNDZjMjdmYzI0YjQxNGNjOSIsIm5iZiI6MTc0NDAwOTcwNS4yOTksInN1YiI6IjY3ZjM3OWU5N2I0M2JkY2UyMGFkMjdjMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.9DmsGx94V5itCcE1395vOs24F9mkWjd_KOtldnwGizY`,
+            accept: "application/json"
+        }
+    });
+    const data = await response.json();
+    const formatedMovies = data.results.map(movie =>({
+        title: movie.title,
+        poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        rating: movie.vote_average,
+       year: movie.release_date
+            ? movie.release_date.split("-")[0]
+            : "Unknown",
+        genre: movie.genre_ids,
+        description: movie.overview
+    }));
+    if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+}
+     movies = formatedMovies;
+    displayMovies(formatedMovies);
+    // return data.results;
+}
