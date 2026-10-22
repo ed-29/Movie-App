@@ -90,7 +90,6 @@ function movieCardMarkup(movie) {
                 <div class="movie-meta">
                     <div class="movie-rating">${movie.rating} stars</div>
                     <div class="movie-year">${movie.year}</div>
-                    <div class="movie-description">${movie.description}</div>
                     <div class="movie-genre">${formatGenres(movie.genre)}</div>
                 </div>
             </div>
@@ -250,10 +249,8 @@ function showMovieDetails(title) {
                 <span>${movie.rating} / 10</span>
                 <span class="movie-genre">${formatGenres(movie.genre)}</span>
             </div>
-            <h3>Lead actors</h3>
-            <p class="details-actors">${movie.actors.join(", ")}</p>
             <h3>Overview</h3>
-            <p class="details-description">${movie.description}</p>
+            <p class="details-description">${movie.description || "No description available."}</p>
         </div>`;
 
     movieDetails.showModal();

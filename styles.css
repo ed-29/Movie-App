@@ -435,58 +435,12 @@ button {
 
 #newest-movie-list {
     display: grid;
-    grid-template-columns: repeat(4, 128px);
-    gap: 14px;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(min(100%, 190px), 1fr)
+    );
+    gap: 28px 22px;
 }
-
-#newest-movie-list .movie-card {
-    position: relative;
-    width: 128px;
-}
-
-#newest-movie-list .movie-info {
-    position: absolute;
-    inset: 0;
-    justify-content: center;
-    overflow: hidden;
-    padding: 12px;
-    background: rgba(10, 10, 15, 0.78);
-    color: #ffffff;
-    opacity: 0;
-    pointer-events: none;
-    backdrop-filter: blur(8px);
-    transition: opacity 0.2s ease;
-}
-
-#newest-movie-list .movie-title {
-    color: #ffffff;
-    font-size: 0.9rem;
-}
-
-#newest-movie-list .movie-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 6px;
-    color: #e5e5eb;
-    font-size: 0.7rem;
-}
-
-#newest-movie-list .movie-description {
-    height: auto;
-    min-height: 0;
-    max-height: 3.6em;
-}
-
-#newest-movie-list .movie-rating {
-    color: #ffd166;
-}
-
-#newest-movie-list .movie-card:hover .movie-info,
-#newest-movie-list .movie-card:focus-visible .movie-info {
-    opacity: 1;
-}
-
 
 /* =========================
    3. GENRE FILTERS
@@ -599,6 +553,9 @@ button {
 ========================= */
 
 .movie-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     min-width: 0;
     overflow: hidden;
     border: 1px solid var(--border-color);
@@ -643,6 +600,7 @@ button {
 }
 
 .movie-info {
+    flex: 1;
     padding: 15px;
     display: flex;
     flex-direction: column;
@@ -650,11 +608,16 @@ button {
 }
 
 .movie-title {
+    display: -webkit-box;
+    min-height: 2.8em;
+    overflow: hidden;
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.4;
     overflow-wrap: anywhere;
     color: var(--text-primary);
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 .movie-title h3 {
@@ -663,10 +626,9 @@ button {
 }
 
 .movie-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
     gap: 8px;
     color: var(--text-secondary);
     font-size: 0.82rem;
@@ -678,30 +640,20 @@ button {
     white-space: nowrap;
 }
 
-.movie-description,
-.movie-discription {
-    display: -webkit-box;
-    height: 3.6em;
-    min-height: 3.6em;
-    max-height: 3.6em;
-    overflow: hidden;
-    color: var(--text-secondary);
-    font-size: 0.75rem;
-    line-height: 1.2em;
-    overflow-wrap: anywhere;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-}
-
 .movie-genre {
+    grid-column: 1 / -1;
     align-self: flex-start;
     display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
     padding: 4px 9px;
     border-radius: 5px;
     background-color: #fff0f1;
     color: #bf1720;
     font-size: 0.75rem;
+    text-overflow: ellipsis;
     text-transform: capitalize;
+    white-space: nowrap;
 }
 
 #movie-details {
@@ -804,11 +756,6 @@ button {
     font-size: 1.05rem;
 }
 
-.details-actors {
-    color: var(--text-secondary);
-    line-height: 1.7;
-}
-
 .details-description {
     color: var(--text-secondary);
     line-height: 1.8;
@@ -878,18 +825,6 @@ button {
         padding-inline: 16px;
     }
 
-    #newest-movie-list {
-        grid-template-columns: repeat(4, 112px);
-        gap: 12px;
-        overflow-x: auto;
-        padding: 2px 2px 8px;
-        scrollbar-width: thin;
-    }
-
-    #newest-movie-list .movie-card {
-        width: 112px;
-    }
-
     .newest-movies-heading {
         align-items: start;
         flex-direction: column;
@@ -902,6 +837,14 @@ button {
 
     #movie-display {
         padding: 25px 16px 45px;
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(min(100%, 155px), 1fr)
+        );
+        gap: 20px 14px;
+    }
+
+    #newest-movie-list {
         grid-template-columns: repeat(
             auto-fill,
             minmax(min(100%, 155px), 1fr)
