@@ -8,6 +8,7 @@ const movieLoadStatus = document.getElementById("movie-load-status");
 
 
 let movies = [];
+let popularMovies = [];
 let popularPage = 0;
 let totalPopularPages = 1;
 let isLoadingPopularMovies = false;
@@ -96,10 +97,17 @@ function movieCardMarkup(movie) {
         </div>`;
 }
 
-const newestMovies = [...movies]
-    .sort((first, second) => second.year - first.year)
-    .slice(0, 4);
-newestMovieList.innerHTML = newestMovies.map(movieCardMarkup).join("");
+function renderNewestMovies() {
+    const newestMovies = [...popularMovies]
+        .sort((first, second) => {
+            const firstYear = Number(first.year) || 0;
+            const secondYear = Number(second.year) || 0;
+            return secondYear - firstYear;
+        })
+        .slice(0, 10);
+
+    newestMovieList.innerHTML = newestMovies.map(movieCardMarkup).join("");
+}
 
 //add dark mode toggle functionality
 const themeToggle = document.getElementById("theme-toggle");
@@ -231,7 +239,8 @@ searchSuggestions.addEventListener("click", event => {
 });
 
 function showMovieDetails(title) {
-    const movie = movies.find(item => item.title === title);
+    const movie = movies.find(item => item.title === title) ||
+        popularMovies.find(item => item.title === title);
 
     if (!movie) {
         return;
@@ -393,7 +402,9 @@ async function fetchPopularMovies(){
 
         popularPage += 1;
         totalPopularPages = data.total_pages || popularPage;
-        movies = [...movies, ...formattedMovies];
+        popularMovies = [...popularMovies, ...formattedMovies];
+        movies = [...popularMovies];
+        renderNewestMovies();
 
         const selectedGenre = document.querySelector("#filters li.active")?.dataset.genre || "all";
         displayMovies(filterMoviesByGenre(selectedGenre));

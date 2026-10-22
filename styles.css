@@ -434,12 +434,19 @@ button {
 }
 
 #newest-movie-list {
-    display: grid;
-    grid-template-columns: repeat(
-        auto-fill,
-        minmax(min(100%, 190px), 1fr)
-    );
-    gap: 28px 22px;
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 2px 2px 8px;
+    scrollbar-width: thin;
+}
+
+#newest-movie-list .movie-card {
+    flex: 0 0 110px;
+}
+
+#newest-movie-list .movie-info {
+    display: none;
 }
 
 /* =========================
@@ -837,14 +844,6 @@ button {
 
     #movie-display {
         padding: 25px 16px 45px;
-        grid-template-columns: repeat(
-            auto-fill,
-            minmax(min(100%, 155px), 1fr)
-        );
-        gap: 20px 14px;
-    }
-
-    #newest-movie-list {
         grid-template-columns: repeat(
             auto-fill,
             minmax(min(100%, 155px), 1fr)
