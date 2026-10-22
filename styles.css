@@ -559,6 +559,39 @@ button {
     align-items: start;
 }
 
+.load-more-container {
+    padding: 0 16px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+#load-more-movies {
+    padding: 12px 28px;
+    border: 0;
+    border-radius: 30px;
+    background-color: var(--accent);
+    color: #ffffff;
+    font-weight: 700;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#load-more-movies:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+#load-more-movies:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+#movie-load-status {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
 
 
 /* =========================

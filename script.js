@@ -3,9 +3,14 @@ const searchButton = document.getElementById("searchButton");
 const genreFilter = document.querySelector("#filters");
 const movieDisplay = document.getElementById("movie-display");
 const newestMovieList = document.getElementById("newest-movie-list");
+const loadMoreButton = document.getElementById("load-more-movies");
+const movieLoadStatus = document.getElementById("movie-load-status");
 
 
 let movies = [];
+let popularPage = 0;
+let totalPopularPages = 1;
+let isLoadingPopularMovies = false;
 
 const genreMap = {
     28: "Action",
@@ -296,6 +301,8 @@ searchButton.addEventListener("click", () => {
     const searchValue = searchInput.value.trim();
     const normalizedSearchValue = searchValue.toLowerCase();
     if (!searchValue) return;
+    loadMoreButton.hidden = true;
+    movieLoadStatus.textContent = "";
     searchMovies(normalizedSearchValue);
 
     closeSuggestions();
@@ -345,9 +352,25 @@ filters.forEach((filter) => {
     });
 });
 
+loadMoreButton.addEventListener("click", () => {
+    fetchPopularMovies().catch(error => {
+        console.error("Unable to load more movies:", error);
+        movieLoadStatus.textContent = "Could not load more movies. Please try again.";
+    });
+});
 
 async function fetchPopularMovies(){
-   const response = await fetch("https://api.themoviedb.org/3/movie/popular",
+    if (isLoadingPopularMovies || popularPage >= totalPopularPages) {
+        return;
+    }
+
+    isLoadingPopularMovies = true;
+    loadMoreButton.disabled = true;
+    loadMoreButton.textContent = "Loading movies...";
+    movieLoadStatus.textContent = "";
+
+    try {
+   const response = await fetch(`https://api.themoviedb.org/3/movie/popular?page=${popularPage + 1}`,
     {
         headers: {
             Authorization :`Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiMGJlYzI4YzBhMjNiMTEwNDZjMjdmYzI0YjQxNGNjOSIsIm5iZiI6MTc0NDAwOTcwNS4yOTksInN1YiI6IjY3ZjM3OWU5N2I0M2JkY2UyMGFkMjdjMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.9DmsGx94V5itCcE1395vOs24F9mkWjd_KOtldnwGizY`,
@@ -355,24 +378,40 @@ async function fetchPopularMovies(){
         }
     }
      );
-     const data = await response.json();
-     const formatedMovies = data.results.map(movie =>({
-        title: movie.title,
-        poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
-        rating: movie.vote_average,
-        year: movie.release_date.split("-")[0],
-        genre: movie.genre_ids,
-        description: movie.overview
-     }));
-// console.log(formatedMovies);
+        if (!response.ok) {
+            throw new Error(`Request failed: ${response.status}`);
+        }
 
-movies = formatedMovies;
-displayMovies(formatedMovies);
+        const data = await response.json();
+        const formattedMovies = data.results.map(movie => ({
+            title: movie.title,
+            poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+            rating: movie.vote_average,
+            year: movie.release_date
+                ? movie.release_date.split("-")[0]
+                : "Unknown",
+            genre: movie.genre_ids,
+            description: movie.overview
+        }));
 
+        popularPage += 1;
+        totalPopularPages = data.total_pages || popularPage;
+        movies = [...movies, ...formattedMovies];
+
+        const selectedGenre = document.querySelector("#filters li.active")?.dataset.genre || "all";
+        displayMovies(filterMoviesByGenre(selectedGenre));
+        loadMoreButton.hidden = popularPage >= totalPopularPages;
+    } finally {
+        isLoadingPopularMovies = false;
+        loadMoreButton.disabled = false;
+        loadMoreButton.textContent = "Load more movies";
+    }
 
 }
-fetchPopularMovies();
-// displayMovies(formatedMovies);
+fetchPopularMovies().catch(error => {
+    console.error("Unable to load popular movies:", error);
+    movieLoadStatus.textContent = "Could not load movies. Please refresh and try again.";
+});
 
 async function searchMovies(searchTerm){
     const response = await fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(searchTerm)}`, {
