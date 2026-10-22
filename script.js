@@ -64,20 +64,17 @@ movies.forEach((movie) => {
 // Create a poster strip for the hero section
 const posterTrack = document.getElementById("poster-track");
 
-const posterImages = movies
-    .map(movie => movie.poster)
-    .filter(poster => poster);
-
-function createPosterStrip() {
-    // Duplicate the posters to create a continuous loop
+function createPosterStrip(moviesToShow) {
+    const posterImages = [...moviesToShow]
+        .filter(movie => movie.poster && movie.year !== "Unknown")
+        .sort((first, second) => Number(first.year) - Number(second.year))
+        .map(movie => movie.poster);
     const allPosters = [...posterImages, ...posterImages];
 
     posterTrack.innerHTML = allPosters
         .map(poster => `<img src="${poster}" alt="" aria-hidden="true">`)
         .join("");
 }
-
-createPosterStrip();
 
 function movieCardMarkup(movie) {
     return `
@@ -404,6 +401,7 @@ async function fetchPopularMovies(){
         totalPopularPages = data.total_pages || popularPage;
         popularMovies = [...popularMovies, ...formattedMovies];
         movies = [...popularMovies];
+        createPosterStrip(popularMovies);
         renderNewestMovies();
 
         const selectedGenre = document.querySelector("#filters li.active")?.dataset.genre || "all";

@@ -517,7 +517,8 @@ button {
         minmax(min(100%, 190px), 1fr)
     );
     gap: 28px 22px;
-    align-items: start;
+    grid-auto-rows: 1fr;
+    align-items: stretch;
 }
 
 .load-more-container {
@@ -849,6 +850,10 @@ button {
             minmax(min(100%, 155px), 1fr)
         );
         gap: 20px 14px;
+    }
+
+    #newest-movie-list .movie-card {
+        flex-basis: 90px;
     }
 
     .movie-info {
