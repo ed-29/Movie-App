@@ -8,12 +8,31 @@ const newestMovieList = document.getElementById("newest-movie-list");
 let movies = [];
 
 const genreMap = {
-        28: "action",
-        35: "comedy",
-        18: "drama",
-        27: "horror",
-        10749: "romance"
-    };
+    28: "Action",
+    12: "Adventure",
+    16: "Animation",
+    35: "Comedy",
+    80: "Crime",
+    99: "Documentary",
+    18: "Drama",
+    10751: "Family",
+    14: "Fantasy",
+    36: "History",
+    27: "Horror",
+    10402: "Music",
+    9648: "Mystery",
+    10749: "Romance",
+    878: "Science Fiction",
+    10770: "TV Movie",
+    53: "Thriller",
+    10752: "War",
+    37: "Western"
+};
+
+function formatGenres(genreIds) {
+    return genreIds.map(id => genreMap[id]).filter(Boolean).join(", ") || "Unknown";
+}
+
 //display all movies on page load
 movies.forEach((movie) => {
     movieDisplay.insertAdjacentHTML('beforeend', `<div class="movie-card">
@@ -26,7 +45,7 @@ movies.forEach((movie) => {
                                     <div class="movie-rating">${movie.rating} stars</div>
                                     <div class="movie-year">${movie.year}</div>
                                     <div class="movie-description">${movie.description}</div>
-                                    <div class="movie-genre">${movie.genre.some(id => genreMap[id])}</div>
+                                    <div class="movie-genre">${formatGenres(movie.genre)}</div>
                                     
                                 </div>
                             </div>
@@ -67,7 +86,7 @@ function movieCardMarkup(movie) {
                     <div class="movie-rating">${movie.rating} stars</div>
                     <div class="movie-year">${movie.year}</div>
                     <div class="movie-description">${movie.description}</div>
-                    <div class="movie-genre">${movie.genre}</div>
+                    <div class="movie-genre">${formatGenres(movie.genre)}</div>
                 </div>
             </div>
         </div>`;
@@ -224,7 +243,7 @@ function showMovieDetails(title) {
             <div class="details-meta">
                 <span>${movie.year}</span>
                 <span>${movie.rating} / 10</span>
-                <span class="movie-genre">${movie.genre}</span>
+                <span class="movie-genre">${formatGenres(movie.genre)}</span>
             </div>
             <h3>Lead actors</h3>
             <p class="details-actors">${movie.actors.join(", ")}</p>
@@ -302,18 +321,10 @@ function displayMovies(moviesToDisplay) {
 
 //filter functionality
 function filterMoviesByGenre(genre) {
-    const genreMap = {
-        28: "action",
-        35: "comedy",
-        18: "drama",
-        27: "horror",
-        10749: "romance"
-    };
-
     const filteredMovies = genre === "all"
         ? movies
         : movies.filter(movie =>
-            movie.genre.some(id => genreMap[id] === genre)
+            movie.genre.some(id => genreMap[id]?.toLowerCase() === genre)
         );
 
     return filteredMovies;
