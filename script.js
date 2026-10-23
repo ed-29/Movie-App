@@ -60,6 +60,14 @@ function formatGenres(genreIds) {
     return genreIds.map(id => genreMap[id]).filter(Boolean).join(", ") || "Unknown";
 }
 
+const filterList = document.querySelector("#filters ul");
+Object.entries(genreMap).forEach(([id, name]) => {
+    const filter = document.createElement("li");
+    filter.dataset.genre = id;
+    filter.textContent = name;
+    filterList.appendChild(filter);
+});
+
 //display all movies on page load
 movies.forEach((movie) => {
     movieDisplay.insertAdjacentHTML('beforeend', `<div class="movie-card">
@@ -352,6 +360,11 @@ function toggleFavorite(button) {
         );
         favoriteButton.querySelector("span").textContent = isFavorite ? "♥" : "♡";
     });
+
+    const activeFilter = document.querySelector("#filters li.active")?.dataset.genre;
+    if (activeFilter === "favorites") {
+        displayMovies(filterMoviesByGenre(activeFilter));
+    }
 }
 
 movieDisplay.addEventListener("keydown", event => {
@@ -403,13 +416,13 @@ function displayMovies(moviesToDisplay) {
 
 //filter functionality
 function filterMoviesByGenre(genre) {
-    const filteredMovies = genre === "all"
-        ? movies
-        : movies.filter(movie =>
-            movie.genre.some(id => genreMap[id]?.toLowerCase() === genre)
-        );
-
-    return filteredMovies;
+    if (genre === "all") {
+        return movies;
+    }
+    if (genre === "favorites") {
+        return movies.filter(movie => favoriteMovies.has(movie.title));
+    }
+    return movies.filter(movie => movie.genre.includes(Number(genre)));
 }
 
 const filters = document.getElementById("filters").querySelectorAll("li");
