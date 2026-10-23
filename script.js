@@ -440,6 +440,8 @@ filters.forEach((filter) => {
     });
 });
 
+const filterScroller = document.querySelector(".filter-controls ul");
+
 loadMoreButton.addEventListener("click", () => {
     fetchPopularMovies().catch(error => {
         console.error("Unable to load more movies:", error);
