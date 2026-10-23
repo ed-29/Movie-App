@@ -12,6 +12,27 @@ let popularMovies = [];
 let popularPage = 0;
 let totalPopularPages = 1;
 let isLoadingPopularMovies = false;
+const favoriteMovies = loadFavoriteMovies();
+
+function loadFavoriteMovies() {
+    const savedFavorites = localStorage.getItem("favoriteMovies");
+
+    if (!savedFavorites) {
+        return new Set();
+    }
+
+    try {
+        const parsedFavorites = JSON.parse(savedFavorites);
+        if (Array.isArray(parsedFavorites) &&
+            parsedFavorites.every(title => typeof title === "string")) {
+            return new Set(parsedFavorites);
+        }
+        throw new Error("Saved favorites must be an array of movie titles.");
+    } catch (error) {
+        console.error("Unable to load saved favorite movies:", error);
+        return new Set();
+    }
+}
 
 const genreMap = {
     28: "Action",
@@ -77,20 +98,29 @@ function createPosterStrip(moviesToShow) {
 }
 
 function movieCardMarkup(movie) {
+    const isFavorite = favoriteMovies.has(movie.title);
+
     return `
-        <div class="movie-card" data-movie-title="${movie.title}" role="button" tabindex="0"
-             aria-label="View details for ${movie.title}">
-            <div class="movie-poster">
-                <img src="${movie.poster}" alt="${movie.title}">
-            </div>
-            <div class="movie-info">
-                <div class="movie-title"><h3>${movie.title}</h3></div>
-                <div class="movie-meta">
-                    <div class="movie-rating">${movie.rating} stars</div>
-                    <div class="movie-year">${movie.year}</div>
-                    <div class="movie-genre">${formatGenres(movie.genre)}</div>
+        <div class="movie-card-container">
+            <div class="movie-card" data-movie-title="${movie.title}" role="button" tabindex="0"
+                 aria-label="View details for ${movie.title}">
+                <div class="movie-poster">
+                    <img src="${movie.poster}" alt="${movie.title}">
+                </div>
+                <div class="movie-info">
+                    <div class="movie-title"><h3>${movie.title}</h3></div>
+                    <div class="movie-meta">
+                        <div class="movie-rating">${movie.rating} stars</div>
+                        <div class="movie-year">${movie.year}</div>
+                        <div class="movie-genre">${formatGenres(movie.genre)}</div>
+                    </div>
                 </div>
             </div>
+            <button class="favorite-toggle" type="button" data-movie-title="${movie.title}"
+                    aria-label="${isFavorite ? "Remove" : "Add"} ${movie.title} ${isFavorite ? "from" : "to"} favorites"
+                    aria-pressed="${isFavorite}">
+                <span aria-hidden="true">${isFavorite ? "♥" : "♡"}</span>
+            </button>
         </div>`;
 }
 
@@ -267,6 +297,12 @@ movieDetails.querySelector(".details-close").addEventListener("click", () => {
 });
 
 movieDisplay.addEventListener("click", event => {
+    const favoriteButton = event.target.closest(".favorite-toggle");
+    if (favoriteButton) {
+        toggleFavorite(favoriteButton);
+        return;
+    }
+
     const movieCard = event.target.closest(".movie-card");
 
     if (movieCard) {
@@ -275,12 +311,48 @@ movieDisplay.addEventListener("click", event => {
 });
 
 newestMovieList.addEventListener("click", event => {
+    const favoriteButton = event.target.closest(".favorite-toggle");
+    if (favoriteButton) {
+        toggleFavorite(favoriteButton);
+        return;
+    }
+
     const movieCard = event.target.closest(".movie-card");
 
     if (movieCard) {
         showMovieDetails(movieCard.dataset.movieTitle);
     }
 });
+
+function toggleFavorite(button) {
+    const title = button.dataset.movieTitle;
+    const isFavorite = !favoriteMovies.has(title);
+
+    if (isFavorite) {
+        favoriteMovies.add(title);
+    } else {
+        favoriteMovies.delete(title);
+    }
+
+    try {
+        localStorage.setItem("favoriteMovies", JSON.stringify([...favoriteMovies]));
+    } catch (error) {
+        console.error("Unable to save favorite movies:", error);
+    }
+
+    document.querySelectorAll(".favorite-toggle").forEach(favoriteButton => {
+        if (favoriteButton.dataset.movieTitle !== title) {
+            return;
+        }
+
+        favoriteButton.setAttribute("aria-pressed", String(isFavorite));
+        favoriteButton.setAttribute(
+            "aria-label",
+            `${isFavorite ? "Remove" : "Add"} ${title} ${isFavorite ? "from" : "to"} favorites`
+        );
+        favoriteButton.querySelector("span").textContent = isFavorite ? "♥" : "♡";
+    });
+}
 
 movieDisplay.addEventListener("keydown", event => {
     if ((event.key === "Enter" || event.key === " ") &&
