@@ -1,6 +1,7 @@
 const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
 const clearSearchButton = document.getElementById("clearSearchButton");
+const siteBrand = document.querySelector(".site-brand");
 const genreFilter = document.querySelector("#filters");
 const movieDisplay = document.getElementById("movie-display");
 const newestMoviesSection = document.getElementById("newest-movies");
@@ -416,7 +417,7 @@ searchButton.addEventListener("click", () => {
     }
 });
 
-clearSearchButton.addEventListener("click", () => {
+function returnToHome() {
     searchRequestId += 1;
     isSearchActive = false;
     searchInput.value = "";
@@ -432,7 +433,17 @@ clearSearchButton.addEventListener("click", () => {
     loadMoreButton.hidden = isLoadingPopularMovies || popularPage >= totalPopularPages;
     movieLoadStatus.textContent = "";
     displayMovies(movies);
+}
+
+clearSearchButton.addEventListener("click", () => {
+    returnToHome();
     searchInput.focus();
+});
+
+siteBrand.addEventListener("click", event => {
+    event.preventDefault();
+    returnToHome();
+    window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 displayMovies(movies);
