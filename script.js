@@ -18,6 +18,10 @@ let isLoadingPopularMovies = false;
 let isSearchActive = false;
 let searchRequestId = 0;
 const favoriteMovies = loadFavoriteMovies();
+const bookmarkedMovies = loadBookmarkedMovies();
+const bookmarkedMovieDetails = new Map(
+    loadBookmarkedMovieDetails().map(movie => [movie.title, movie])
+);
 
 function loadFavoriteMovies() {
     const savedFavorites = localStorage.getItem("favoriteMovies");
@@ -36,6 +40,53 @@ function loadFavoriteMovies() {
     } catch (error) {
         console.error("Unable to load saved favorite movies:", error);
         return new Set();
+    }
+}
+
+function loadBookmarkedMovies() {
+    const savedBookmarks = localStorage.getItem("bookmarkedMovies");
+
+    if (!savedBookmarks) {
+        return new Set();
+    }
+
+    try {
+        const parsedBookmarks = JSON.parse(savedBookmarks);
+        if (Array.isArray(parsedBookmarks) &&
+            parsedBookmarks.every(title => typeof title === "string")) {
+            return new Set(parsedBookmarks);
+        }
+        throw new Error("Saved bookmarks must be an array of movie titles.");
+    } catch (error) {
+        console.error("Unable to load bookmarked movies:", error);
+        return new Set();
+    }
+}
+
+function loadBookmarkedMovieDetails() {
+    const savedMovies = localStorage.getItem("bookmarkedMovieDetails");
+
+    if (!savedMovies) {
+        return [];
+    }
+
+    try {
+        const parsedMovies = JSON.parse(savedMovies);
+        if (Array.isArray(parsedMovies) &&
+            parsedMovies.every(movie =>
+                movie &&
+                typeof movie.title === "string" &&
+                typeof movie.poster === "string" &&
+                (typeof movie.rating === "number" || typeof movie.rating === "string") &&
+                typeof movie.year === "string" &&
+                Array.isArray(movie.genre)
+            )) {
+            return parsedMovies;
+        }
+        throw new Error("Saved bookmarked movies have an invalid format.");
+    } catch (error) {
+        console.error("Unable to load bookmarked movie details:", error);
+        return [];
     }
 }
 
@@ -112,6 +163,7 @@ function createPosterStrip(moviesToShow) {
 
 function movieCardMarkup(movie) {
     const isFavorite = favoriteMovies.has(movie.title);
+    const isBookmarked = bookmarkedMovies.has(movie.title);
 
     return `
         <div class="movie-card-container">
@@ -121,7 +173,17 @@ function movieCardMarkup(movie) {
                     <img src="${movie.poster}" alt="${movie.title}">
                 </div>
                 <div class="movie-info">
-                    <div class="movie-title"><h3>${movie.title}</h3></div>
+                    <div class="movie-title-row">
+                        <div class="movie-title"><h3>${movie.title}</h3></div>
+                        <button class="bookmark-toggle" type="button" data-movie-title="${movie.title}"
+                                aria-label="${isBookmarked ? "Remove" : "Add"} ${movie.title} ${isBookmarked ? "from" : "to"} bookmarks"
+                                aria-pressed="${isBookmarked}">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-4-6 4z"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <div class="movie-meta">
                         <div class="movie-rating">${movie.rating} stars</div>
                         <div class="movie-year">${movie.year}</div>
@@ -311,6 +373,12 @@ movieDetails.querySelector(".details-close").addEventListener("click", () => {
 });
 
 movieDisplay.addEventListener("click", event => {
+    const bookmarkButton = event.target.closest(".bookmark-toggle");
+    if (bookmarkButton) {
+        toggleBookmark(bookmarkButton);
+        return;
+    }
+
     const favoriteButton = event.target.closest(".favorite-toggle");
     if (favoriteButton) {
         toggleFavorite(favoriteButton);
@@ -325,6 +393,12 @@ movieDisplay.addEventListener("click", event => {
 });
 
 newestMovieList.addEventListener("click", event => {
+    const bookmarkButton = event.target.closest(".bookmark-toggle");
+    if (bookmarkButton) {
+        toggleBookmark(bookmarkButton);
+        return;
+    }
+
     const favoriteButton = event.target.closest(".favorite-toggle");
     if (favoriteButton) {
         toggleFavorite(favoriteButton);
@@ -369,6 +443,49 @@ function toggleFavorite(button) {
 
     const activeFilter = document.querySelector("#filters li.active")?.dataset.genre;
     if (activeFilter === "favorites") {
+        displayMovies(filterMoviesByGenre(activeFilter));
+    }
+}
+
+function toggleBookmark(button) {
+    const title = button.dataset.movieTitle;
+    const isBookmarked = !bookmarkedMovies.has(title);
+
+    if (isBookmarked) {
+        bookmarkedMovies.add(title);
+        const movie = [...movies, ...popularMovies].find(item => item.title === title);
+        if (movie) {
+            bookmarkedMovieDetails.set(title, movie);
+        }
+    } else {
+        bookmarkedMovies.delete(title);
+        bookmarkedMovieDetails.delete(title);
+    }
+
+    try {
+        localStorage.setItem("bookmarkedMovies", JSON.stringify([...bookmarkedMovies]));
+        localStorage.setItem(
+            "bookmarkedMovieDetails",
+            JSON.stringify([...bookmarkedMovieDetails.values()])
+        );
+    } catch (error) {
+        console.error("Unable to save bookmarked movies:", error);
+    }
+
+    document.querySelectorAll(".bookmark-toggle").forEach(bookmarkButton => {
+        if (bookmarkButton.dataset.movieTitle !== title) {
+            return;
+        }
+
+        bookmarkButton.setAttribute("aria-pressed", String(isBookmarked));
+        bookmarkButton.setAttribute(
+            "aria-label",
+            `${isBookmarked ? "Remove" : "Add"} ${title} ${isBookmarked ? "from" : "to"} bookmarks`
+        );
+    });
+
+    const activeFilter = document.querySelector("#filters li.active")?.dataset.genre;
+    if (activeFilter === "bookmarks") {
         displayMovies(filterMoviesByGenre(activeFilter));
     }
 }
@@ -460,14 +577,42 @@ function filterMoviesByGenre(genre) {
     if (genre === "favorites") {
         return movies.filter(movie => favoriteMovies.has(movie.title));
     }
+    if (genre === "bookmarks") {
+        const availableMovies = new Map(
+            [...bookmarkedMovieDetails.values(), ...popularMovies, ...movies]
+                .map(movie => [movie.title, movie])
+        );
+        return [...availableMovies.values()]
+            .filter(movie => bookmarkedMovies.has(movie.title));
+    }
     return movies.filter(movie => movie.genre.includes(Number(genre)));
+}
+
+async function loadMissingBookmarkedMovieDetails(requestId) {
+    const availableTitles = new Set([
+        ...bookmarkedMovieDetails.keys(),
+        ...popularMovies.map(movie => movie.title),
+        ...movies.map(movie => movie.title)
+    ]);
+    const missingTitles = [...bookmarkedMovies].filter(title => !availableTitles.has(title));
+
+    for (const title of missingTitles) {
+        if (requestId !== searchRequestId) {
+            return;
+        }
+        await searchMovies(title, requestId, true);
+    }
+
+    if (document.querySelector("#filters li.active")?.dataset.genre === "bookmarks") {
+        displayMovies(filterMoviesByGenre("bookmarks"));
+    }
 }
 
 const filters = document.getElementById("filters").querySelectorAll("li");
 filters.forEach((filter) => {
     filter.addEventListener("click", (event) => {
         const selectedGenre = event.currentTarget.dataset.genre;
-        const filteredMovies = filterMoviesByGenre(selectedGenre);
+        const requestId = ++searchRequestId;
 
         filters.forEach((item) => {
             item.classList.toggle("active", item === event.currentTarget);
@@ -476,7 +621,15 @@ filters.forEach((filter) => {
         isSearchActive = false;
         newestMoviesSection.hidden = false;
         genreFilter.style.display = "block";
-        displayMovies(filteredMovies);
+        movieLoadStatus.textContent = "";
+        displayMovies(filterMoviesByGenre(selectedGenre));
+
+        if (selectedGenre === "bookmarks") {
+            loadMissingBookmarkedMovieDetails(requestId).catch(error => {
+                console.error("Unable to load bookmarked movies:", error);
+                movieLoadStatus.textContent = "Could not load all bookmarked movies. Please try again.";
+            });
+        }
     });
 });
 
@@ -548,31 +701,53 @@ fetchPopularMovies().catch(error => {
     movieLoadStatus.textContent = "Could not load movies. Please refresh and try again.";
 });
 
-async function searchMovies(searchTerm, requestId){
+async function searchMovies(searchTerm, requestId, resolveBookmark = false) {
     const response = await fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(searchTerm)}`, {
         headers: {
             Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiMGJlYzI4YzBhMjNiMTEwNDZjMjdmYzI0YjQxNGNjOSIsIm5iZiI6MTc0NDAwOTcwNS4yOTksInN1YiI6IjY3ZjM3OWU5N2I0M2JkY2UyMGFkMjdjMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.9DmsGx94V5itCcE1395vOs24F9mkWjd_KOtldnwGizY`,
             accept: "application/json"
         }
     });
+    if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+    }
+
     const data = await response.json();
     if (requestId !== searchRequestId) {
         return;
     }
-    const formatedMovies = data.results.map(movie =>({
+    const formattedMovies = data.results.map(movie => ({
         title: movie.title,
         poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
         rating: movie.vote_average,
-       year: movie.release_date
+        year: movie.release_date
             ? movie.release_date.split("-")[0]
             : "Unknown",
         genre: movie.genre_ids,
-        description: movie.overview
+        description: movie.overview || ""
     }));
-    if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
-}
-     movies = formatedMovies;
-    displayMovies(formatedMovies);
-    // return data.results;
+
+    if (resolveBookmark) {
+        const bookmarkMovie = formattedMovies.find(movie =>
+            movie.title.toLowerCase() === searchTerm.toLowerCase()
+        ) || formattedMovies[0];
+        const savedTitle = [...bookmarkedMovies].find(title =>
+            title.toLowerCase() === searchTerm.toLowerCase()
+        );
+
+        if (bookmarkMovie && savedTitle) {
+            bookmarkedMovieDetails.set(savedTitle, {
+                ...bookmarkMovie,
+                title: savedTitle
+            });
+            localStorage.setItem(
+                "bookmarkedMovieDetails",
+                JSON.stringify([...bookmarkedMovieDetails.values()])
+            );
+        }
+        return;
+    }
+
+    movies = formattedMovies;
+    displayMovies(formattedMovies);
 }
