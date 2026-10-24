@@ -1,5 +1,6 @@
 const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
+const clearSearchButton = document.getElementById("clearSearchButton");
 const genreFilter = document.querySelector("#filters");
 const movieDisplay = document.getElementById("movie-display");
 const newestMoviesSection = document.getElementById("newest-movies");
@@ -14,6 +15,7 @@ let popularPage = 0;
 let totalPopularPages = 1;
 let isLoadingPopularMovies = false;
 let isSearchActive = false;
+let searchRequestId = 0;
 const favoriteMovies = loadFavoriteMovies();
 
 function loadFavoriteMovies() {
@@ -184,6 +186,7 @@ searchInput.addEventListener("input", () => {
         movie.title.toLowerCase().includes(searchValue)
     );
 
+    clearSearchButton.hidden = !searchInput.value;
     activeSuggestionIndex = -1;
     // displayMovies(matchingMovies);
     displaySearchSuggestions(searchValue ? matchingMovies.slice(0, 5) : []);
@@ -392,10 +395,11 @@ searchButton.addEventListener("click", () => {
     const normalizedSearchValue = searchValue.toLowerCase();
     if (!searchValue) return;
     isSearchActive = true;
+    const requestId = ++searchRequestId;
     newestMoviesSection.hidden = true;
     loadMoreButton.hidden = true;
     movieLoadStatus.textContent = "";
-    searchMovies(normalizedSearchValue);
+    searchMovies(normalizedSearchValue, requestId);
 
     closeSuggestions();
     genreFilter.style.display = "none";
@@ -410,6 +414,25 @@ searchButton.addEventListener("click", () => {
                                 <h3>Results for "${searchValue}"</h3>
                             </div>`);
     }
+});
+
+clearSearchButton.addEventListener("click", () => {
+    searchRequestId += 1;
+    isSearchActive = false;
+    searchInput.value = "";
+    clearSearchButton.hidden = true;
+    closeSuggestions();
+
+    movies = [...popularMovies];
+    filters.forEach(filter => {
+        filter.classList.toggle("active", filter.dataset.genre === "all");
+    });
+    newestMoviesSection.hidden = false;
+    genreFilter.style.display = "block";
+    loadMoreButton.hidden = isLoadingPopularMovies || popularPage >= totalPopularPages;
+    movieLoadStatus.textContent = "";
+    displayMovies(movies);
+    searchInput.focus();
 });
 
 displayMovies(movies);
@@ -514,7 +537,7 @@ fetchPopularMovies().catch(error => {
     movieLoadStatus.textContent = "Could not load movies. Please refresh and try again.";
 });
 
-async function searchMovies(searchTerm){
+async function searchMovies(searchTerm, requestId){
     const response = await fetch(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(searchTerm)}`, {
         headers: {
             Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiMGJlYzI4YzBhMjNiMTEwNDZjMjdmYzI0YjQxNGNjOSIsIm5iZiI6MTc0NDAwOTcwNS4yOTksInN1YiI6IjY3ZjM3OWU5N2I0M2JkY2UyMGFkMjdjMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.9DmsGx94V5itCcE1395vOs24F9mkWjd_KOtldnwGizY`,
@@ -522,6 +545,9 @@ async function searchMovies(searchTerm){
         }
     });
     const data = await response.json();
+    if (requestId !== searchRequestId) {
+        return;
+    }
     const formatedMovies = data.results.map(movie =>({
         title: movie.title,
         poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
