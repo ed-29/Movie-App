@@ -2,6 +2,7 @@ const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
 const genreFilter = document.querySelector("#filters");
 const movieDisplay = document.getElementById("movie-display");
+const newestMoviesSection = document.getElementById("newest-movies");
 const newestMovieList = document.getElementById("newest-movie-list");
 const loadMoreButton = document.getElementById("load-more-movies");
 const movieLoadStatus = document.getElementById("movie-load-status");
@@ -12,6 +13,7 @@ let popularMovies = [];
 let popularPage = 0;
 let totalPopularPages = 1;
 let isLoadingPopularMovies = false;
+let isSearchActive = false;
 const favoriteMovies = loadFavoriteMovies();
 
 function loadFavoriteMovies() {
@@ -389,6 +391,8 @@ searchButton.addEventListener("click", () => {
     const searchValue = searchInput.value.trim();
     const normalizedSearchValue = searchValue.toLowerCase();
     if (!searchValue) return;
+    isSearchActive = true;
+    newestMoviesSection.hidden = true;
     loadMoreButton.hidden = true;
     movieLoadStatus.textContent = "";
     searchMovies(normalizedSearchValue);
@@ -435,6 +439,8 @@ filters.forEach((filter) => {
             item.classList.toggle("active", item === event.currentTarget);
         });
 
+        isSearchActive = false;
+        newestMoviesSection.hidden = false;
         genreFilter.style.display = "block";
         displayMovies(filteredMovies);
     });
@@ -487,13 +493,15 @@ async function fetchPopularMovies(){
         popularPage += 1;
         totalPopularPages = data.total_pages || popularPage;
         popularMovies = [...popularMovies, ...formattedMovies];
-        movies = [...popularMovies];
         createPosterStrip(popularMovies);
         renderNewestMovies();
 
-        const selectedGenre = document.querySelector("#filters li.active")?.dataset.genre || "all";
-        displayMovies(filterMoviesByGenre(selectedGenre));
-        loadMoreButton.hidden = popularPage >= totalPopularPages;
+        if (!isSearchActive) {
+            movies = [...popularMovies];
+            const selectedGenre = document.querySelector("#filters li.active")?.dataset.genre || "all";
+            displayMovies(filterMoviesByGenre(selectedGenre));
+        }
+        loadMoreButton.hidden = isSearchActive || popularPage >= totalPopularPages;
     } finally {
         isLoadingPopularMovies = false;
         loadMoreButton.disabled = false;
