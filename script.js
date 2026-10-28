@@ -8,6 +8,17 @@ const newestMoviesSection = document.getElementById("newest-movies");
 const newestMovieList = document.getElementById("newest-movie-list");
 const loadMoreButton = document.getElementById("load-more-movies");
 const movieLoadStatus = document.getElementById("movie-load-status");
+const noPosterImage = "img/No-Poster.png";
+
+document.addEventListener("error", event => {
+    const image = event.target;
+    if (!(image instanceof HTMLImageElement) || image.dataset.fallbackApplied) {
+        return;
+    }
+
+    image.dataset.fallbackApplied = "true";
+    image.src = noPosterImage;
+}, true);
 
 
 let movies = [];
@@ -668,7 +679,9 @@ async function fetchPopularMovies(){
         const data = await response.json();
         const formattedMovies = data.results.map(movie => ({
             title: movie.title,
-            poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+            poster: movie.poster_path
+                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                : noPosterImage,
             rating: movie.vote_average,
             year: movie.release_date
                 ? movie.release_date.split("-")[0]
@@ -718,7 +731,9 @@ async function searchMovies(searchTerm, requestId, resolveBookmark = false) {
     }
     const formattedMovies = data.results.map(movie => ({
         title: movie.title,
-        poster: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        poster: movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : noPosterImage,
         rating: movie.vote_average,
         year: movie.release_date
             ? movie.release_date.split("-")[0]
