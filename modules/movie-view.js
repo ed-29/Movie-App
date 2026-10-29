@@ -118,6 +118,10 @@ export function showMovieDetails(title, movies, popularMovies) {
                 <span>${movie.rating} / 10</span>
                 <span class="movie-genre">${formatGenres(movie.genre)}</span>
             </div>
+            ${movie.leadActors?.length
+        ? `<h3>Lead actors</h3>
+            <p class="details-description">${movie.leadActors.join(", ")}</p>`
+        : ""}
             <h3>Overview</h3>
             <p class="details-description">${movie.description || "No description available."}</p>
         </div>`;

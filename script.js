@@ -413,6 +413,34 @@ loadMoreButton.addEventListener("click", () => {
     });
 });
 
+async function fetchMovieCredits(movieId) {
+    try {
+        const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/credits`, {
+            headers: {
+                Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiMGJlYzI4YzBhMjNiMTEwNDZjMjdmYzI0YjQxNGNjOSIsIm5iZiI6MTc0NDAwOTcwNS4yOTksInN1YiI6IjY3ZjM3OWU5N2I0M2JkY2UyMGFkMjdjMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.9DmsGx94V5itCcE1395vOs24F9mkWjd_KOtldnwGizY`,
+                accept: "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            return [];
+        }
+
+        const data = await response.json();
+        return data.cast || [];
+    } catch (error) {
+        console.error(`Unable to load credits for movie ${movieId}:`, error);
+        return [];
+    }
+}
+
+function getLeadActors(cast = []) {
+    return cast
+        .slice(0, 3)
+        .map(actor => actor.name)
+        .filter(Boolean);
+}
+
 async function fetchPopularMovies(){
     if (isLoadingPopularMovies || popularPage >= totalPopularPages) {
         return;
@@ -437,17 +465,23 @@ async function fetchPopularMovies(){
         }
 
         const data = await response.json();
-        const formattedMovies = data.results.map(movie => ({
-            title: movie.title,
-            poster: movie.poster_path
-                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                : noPosterImage,
-            rating: movie.vote_average,
-            year: movie.release_date
-                ? movie.release_date.split("-")[0]
-                : "Unknown",
-            genre: movie.genre_ids,
-            description: movie.overview
+        const formattedMovies = await Promise.all(data.results.map(async movie => {
+            const cast = await fetchMovieCredits(movie.id);
+
+            return {
+                title: movie.title,
+                poster: movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : noPosterImage,
+                rating: movie.vote_average,
+                year: movie.release_date
+                    ? movie.release_date.split("-")[0]
+                    : "Unknown",
+                genre: movie.genre_ids,
+                description: movie.overview || "",
+                leadActors: getLeadActors(cast),
+                cast
+            };
         }));
 
         popularPage += 1;
@@ -489,17 +523,23 @@ async function searchMovies(searchTerm, requestId, resolveBookmark = false) {
     if (requestId !== searchRequestId) {
         return;
     }
-    const formattedMovies = data.results.map(movie => ({
-        title: movie.title,
-        poster: movie.poster_path
-            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-            : noPosterImage,
-        rating: movie.vote_average,
-        year: movie.release_date
-            ? movie.release_date.split("-")[0]
-            : "Unknown",
-        genre: movie.genre_ids,
-        description: movie.overview || ""
+    const formattedMovies = await Promise.all(data.results.map(async movie => {
+        const cast = await fetchMovieCredits(movie.id);
+
+        return {
+            title: movie.title,
+            poster: movie.poster_path
+                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                : noPosterImage,
+            rating: movie.vote_average,
+            year: movie.release_date
+                ? movie.release_date.split("-")[0]
+                : "Unknown",
+            genre: movie.genre_ids,
+            description: movie.overview || "",
+            leadActors: getLeadActors(cast),
+            cast
+        };
     }));
 
     if (resolveBookmark) {
