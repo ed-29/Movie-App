@@ -98,13 +98,16 @@ export function displaySearchSuggestions(suggestions) {
     searchInput.removeAttribute("aria-activedescendant");
 }
 
-export function showMovieDetails(title, movies, popularMovies) {
+export function showMovieDetails(title, movies, popularMovies, favoriteMovies, bookmarkedMovies) {
     const movie = movies.find(item => item.title === title) ||
         popularMovies.find(item => item.title === title);
 
     if (!movie) {
         return;
     }
+
+    const isFavorite = favoriteMovies.has(movie.title);
+    const isBookmarked = bookmarkedMovies.has(movie.title);
 
     movieDetailsContent.innerHTML = `
         <div class="details-poster">
@@ -113,6 +116,21 @@ export function showMovieDetails(title, movies, popularMovies) {
         <div class="details-info">
             <p class="details-eyebrow">Movie details</p>
             <h2 id="details-title">${movie.title}</h2>
+            <div class="details-actions">
+                <button class="favorite-toggle" type="button" data-movie-title="${movie.title}"
+                        aria-label="${isFavorite ? "Remove" : "Add"} ${movie.title} ${isFavorite ? "from" : "to"} favorites"
+                        aria-pressed="${isFavorite}">
+                    <span aria-hidden="true">${isFavorite ? "♥" : "♡"}</span>
+                </button>
+                <button class="bookmark-toggle" type="button" data-movie-title="${movie.title}"
+                        aria-label="${isBookmarked ? "Remove" : "Add"} ${movie.title} ${isBookmarked ? "from" : "to"} bookmarks"
+                        aria-pressed="${isBookmarked}">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-4-6 4z"></path>
+                    </svg>
+                </button>
+            </div>
             <div class="details-meta">
                 <span>${movie.year}</span>
                 <span>${movie.rating} / 10</span>

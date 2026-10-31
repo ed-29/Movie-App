@@ -144,11 +144,24 @@ searchSuggestions.addEventListener("click", event => {
 });
 
 function showMovieDetails(title) {
-    renderMovieDetails(title, movies, popularMovies);
+    renderMovieDetails(title, movies, popularMovies, favoriteMovies, bookmarkedMovies);
 }
 
 movieDetails.querySelector(".details-close").addEventListener("click", () => {
     movieDetails.close();
+});
+
+movieDetails.addEventListener("click", event => {
+    const favoriteButton = event.target.closest(".favorite-toggle");
+    if (favoriteButton) {
+        toggleFavorite(favoriteButton);
+        return;
+    }
+
+    const bookmarkButton = event.target.closest(".bookmark-toggle");
+    if (bookmarkButton) {
+        toggleBookmark(bookmarkButton);
+    }
 });
 
 movieDisplay.addEventListener("click", event => {
