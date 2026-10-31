@@ -885,7 +885,8 @@ button {
 }
 
 .details-info {
-    align-self: center;
+    display: flex;
+    flex-direction: column;
     padding: clamp(28px, 5vw, 56px);
 }
 
@@ -907,7 +908,12 @@ button {
 .details-actions {
     display: flex;
     gap: 10px;
-    margin: -4px 0 24px;
+    margin-top: 20px;
+}
+
+.details-bottom {
+    margin-top: auto;
+    padding-top: 24px;
 }
 
 #movie-details .favorite-toggle,
