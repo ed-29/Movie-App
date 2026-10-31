@@ -868,13 +868,13 @@ button {
 }
 
 .details-close {
-    position: absolute;
+    position: sticky;
     top: 14px;
-    right: 14px;
     z-index: 1;
     display: grid;
     width: 40px;
     height: 40px;
+    margin: 14px 14px -54px auto;
     place-items: center;
     border: 1px solid var(--border-color);
     border-radius: 50%;
